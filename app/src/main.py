@@ -68,7 +68,7 @@ class User(BaseModel):
 # --- FastAPI setup ---
 app = FastAPI(
     title="Mi primera API con FastAPI",
-    description="Una API de ejemplo con base de datos SQLite.",
+    description="Una API de ejemplo con base de datos PostgreSQL.",
     version="1.0.0"
 )
 
@@ -93,7 +93,7 @@ def create_user(user: User):
     existing = db.query(UserDB).filter(UserDB.email == user.email).first()
     if existing:
         db.close()
-        raise HTTPException(status_code=400, detail="El email ya está registrado")
+        raise HTTPException(status_code=422, detail="El email ya está registrado")
 
     user_db = UserDB(username=user.username, email=user.email, age=user.age)
     db.add(user_db)
@@ -127,6 +127,13 @@ def get_user_by_id(user_id: int):
         "email": user.email,
         "age": user.age
     }
+
+@app.get("/users")
+def get_users():
+    db = SessionLocal()
+    users = db.query(UserDB).all()
+    db.close()
+    return users
 
 @app.delete("/users/{user_id}")
 def delete_user_by_id(user_id: int):
