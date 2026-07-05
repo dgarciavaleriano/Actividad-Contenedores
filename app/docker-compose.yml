@@ -1,0 +1,35 @@
+services:
+  mibasededatos:
+    image: postgres:15
+    container_name: mibasededatos
+    environment:
+      POSTGRES_USER: users
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: users
+    ports:
+      - "5432:5432"
+    volumes:
+      - mi-volumen:/var/lib/postgresql/data
+    networks:
+      - mi-red
+
+  actividad-contenedores:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: actividad-contenedores
+    environment:
+      DATABASE_URL: postgresql+psycopg2://users:secret123@mibasededatos:5432/users
+    ports:
+      - "8080:8000"
+    networks:
+      - mi-red
+    depends_on:
+      - mibasededatos
+
+volumes:
+  mi-volumen:
+
+networks:
+  mi-red:
+    driver: bridge
